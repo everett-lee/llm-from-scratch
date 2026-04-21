@@ -1,10 +1,11 @@
 import tiktoken
 import torch
+from tiktoken import Encoding
 from torch.utils.data import Dataset, DataLoader
 
 
 class GPTDatasetV1(Dataset):
-    def __init__(self, txt, tokenizer, max_length, stride):
+    def __init__(self, txt: str, tokenizer: Encoding, max_length: int, stride: int):
         self.input_ids = []
         self.target_ids = []
 
@@ -18,10 +19,10 @@ class GPTDatasetV1(Dataset):
             self.input_ids.append(torch.tensor(input_chunk))
             self.target_ids.append(torch.tensor(target_chunk))
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.input_ids)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int):
         return self.input_ids[idx], self.target_ids[idx]
 
 

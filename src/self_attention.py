@@ -5,14 +5,14 @@ import torch.nn as nn
 class SelfAttention_v2(nn.Module):
     """basic self attention"""
 
-    def __init__(self, d_in, d_out, qkv_bias=False):
+    def __init__(self, d_in: int, d_out: int, qkv_bias=False):
         super().__init__()
         # auto weight initialisation
         self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)
         self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # performs mat mul on input
         keys = self.W_key(x)
         queries = self.W_query(x)
@@ -26,7 +26,14 @@ class SelfAttention_v2(nn.Module):
 class CausalAttention(nn.Module):
     """Inefficient causal attention, single head."""
 
-    def __init__(self, d_in, d_out, context_length, dropout, qkv_bias=False):
+    def __init__(
+        self,
+        d_in: int,
+        d_out: int,
+        context_length: int,
+        dropout: float,
+        qkv_bias: bool = False,
+    ):
         super().__init__()
         # Auto weight initialisation
         self.d_out = d_out
@@ -42,7 +49,7 @@ class CausalAttention(nn.Module):
             "mask", torch.triu(torch.ones(context_length, context_length), diagonal=1)
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # batches, number of tokens, embedding dimension per token
         b, num_tokens, d_in = x.shape
 
@@ -67,7 +74,15 @@ class CausalAttention(nn.Module):
 
 
 class MultiHeadAttentionWrapper(nn.Module):
-    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+    def __init__(
+        self,
+        d_in: int,
+        d_out: int,
+        context_length: int,
+        dropout: float,
+        num_heads: int,
+        qkv_bias: bool = False,
+    ):
         super().__init__()
         self.heads = nn.ModuleList(
             [
@@ -76,14 +91,22 @@ class MultiHeadAttentionWrapper(nn.Module):
             ]
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         # concatenate all the attention outputs
         # sequential and not efficient
         return torch.cat([head(x) for head in self.heads], dim=-1)
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
+    def __init__(
+        self,
+        d_in: int,
+        d_out: int,
+        context_length: int,
+        dropout: float,
+        num_heads: int,
+        qkv_bias: bool = False,
+    ):
         super().__init__()
         assert d_out % num_heads == 0, "d_out must be divisible by num_heads"
 
@@ -99,7 +122,7 @@ class MultiHeadAttention(nn.Module):
             "mask", torch.triu(torch.ones(context_length, context_length), diagonal=1)
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         b, num_tokens, d_in = x.shape
         keys = self.W_key(x)
         queries = self.W_query(x)
