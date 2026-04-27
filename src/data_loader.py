@@ -34,7 +34,7 @@ def create_dataloader_v1(
     shuffle=True,
     drop_last=True,
     num_workers=0,
-):
+) -> DataLoader:
     # Initialize the tokenizer
     tokenizer = tiktoken.get_encoding("gpt2")
 
